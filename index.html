@@ -470,6 +470,14 @@ input[type=checkbox]{accent-color:var(--accent);width:20px;height:20px}
 .tri{display:flex;gap:4px;flex:none}
 .tri .chip{padding:7px 10px;font-size:12.5px}
 .row2{display:flex;gap:8px}
+/* ---- Fase 3 ---- */
+.backbar{position:sticky;top:0;z-index:6;padding:0 0 8px;margin-top:-4px}
+.backbtn{appearance:none;display:inline-flex;align-items:center;gap:4px;background:var(--glass2);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--stroke);border-radius:999px;padding:7px 14px 7px 10px;font:600 14px var(--fb);color:var(--ink);cursor:pointer;box-shadow:0 4px 14px var(--shadow)}
+.shead{flex:none;padding:0 16px 4px}
+.st-back{position:absolute;left:14px;top:calc(26px + env(safe-area-inset-top,0px));z-index:4}
+.ciback{position:absolute;left:14px;top:12px;z-index:3}
+.updci{position:absolute;left:14px;right:14px;top:58px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;border-radius:16px;font-size:13.5px;text-align:left}
+.upd b{font-size:16px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -687,6 +695,14 @@ const ITEMS=[
  {k:'theme',id:'lluvia',n:'Lluvia',d:'Una tarde gris y suave',p:35,c:['#18232e','#27394a','#48657b','#7d9ab0'],tone:'dark',ac:'#8fc4ea',fx:'rain'},
  {k:'theme',id:'atardecer',n:'Atardecer',d:'Cielo naranja y rosa',p:30,c:['#2b2350','#7b4585','#e07b6e','#f6c283'],tone:'dark',ac:'#ffc27a',fx:'glow'},
  {k:'theme',id:'urbana',n:'Noche urbana',d:'Luces lejanas de ciudad',p:40,c:['#090a17','#151837','#291e58','#4d2a68'],tone:'dark',ac:'#ff77b7',fx:'bokeh'},
+ {k:'theme',id:'nieve',n:'Nieve',d:'Copos lentos y aire azul',p:40,c:['#f4f8fc','#dbe8f3','#b9cfe3','#eaf2f9'],tone:'light',ac:'#3f74a8',fx:'snow'},
+ {k:'theme',id:'flores',n:'Flores de primavera',d:'Pétalos que se van con el viento',p:40,c:['#fff4f6','#fbd9e3','#f3b7cc','#e6f0d8'],tone:'light',ac:'#b03e73',fx:'petals'},
+ {k:'theme',id:'oceano',n:'Mar en calma',d:'Burbujas subiendo despacio',p:40,c:['#0c2c3c','#14586b','#2b8a9a','#8fd4d0'],tone:'dark',ac:'#7fe0d4',fx:'bubbles'},
+ {k:'theme',id:'luciernagas',n:'Luciérnagas',d:'Bosque de noche con lucecitas',p:45,c:['#0a1a12','#12301f','#1f4d2f','#365f2a'],tone:'dark',ac:'#d4e86a',fx:'fireflies'},
+ {k:'theme',id:'estrellas',n:'Cielo de estrellas',d:'Noche clara y alguna fugaz',p:45,c:['#070b1e','#0f1a3f','#1b2a63','#2f3d86'],tone:'dark',ac:'#b9c6ff',fx:'stars'},
+ {k:'theme',id:'desierto',n:'Desierto',d:'Dunas tibias y polvo de luz',p:40,c:['#fbeed6','#f2d3a3','#e0aa72','#f0c58a'],tone:'light',ac:'#a94f24',fx:'dust'},
+ {k:'theme',id:'boreal',n:'Aurora boreal',d:'Cintas verdes sobre la noche',p:45,c:['#06121c','#0d2b3a','#155a55','#3a2e6b'],tone:'dark',ac:'#7ff0b8',fx:'aurora'},
+ {k:'theme',id:'cafe',n:'Tarde de café',d:'Madera, vapor y luz cálida',p:35,c:['#f3e6d6','#dfc4a4','#b98c63','#e6cfb0'],tone:'light',ac:'#84461f',fx:'glow'},
  {k:'bg',id:'base',n:'Del tema',d:'Sin fondo especial',p:0},
  {k:'bg',id:'bosque',n:'Bosque de niebla',d:'Verdes suaves y bruma',p:25,c:['#eef2e8','#cfdcc8','#a8c1a4','#e2e9d2'],tone:'light'},
  {k:'bg',id:'amanecer',n:'Amanecer durazno',d:'Luz tibia de la mañana',p:25,c:['#fff1df','#ffd7c2','#f8b7b0','#ffe9b8'],tone:'light'},
@@ -725,7 +741,7 @@ const ITEMS=[
  {k:'pack',id:'sobre',n:'Sobre de estampillas',d:'Una estampilla nueva, nunca repetida',p:12,e:'✉️'}
 ];
 const SECS=[
- ['theme','Temas de temporada','Cada tema llega con su temporada de 4 semanas. Los que ya son tuyos, lo son para siempre.'],
+ ['theme','Temas de temporada','Cada temporada de 4 semanas trae un tema y uno invitado. Los que ya son tuyos, lo son para siempre.'],
  ['bg','Fondos',''],['pal','Paletas Liquid Glass',''],['icon','Iconos de racha',''],['frame','Marcos para fotos',''],
  ['chap','Portadas de capítulo','Se estrenan desde la vista del mes en Momentos.'],
  ['coll','Colecciones visuales','Cambian cómo luce el mapa del mes.'],
@@ -735,18 +751,22 @@ const IT=(k,id)=>ITEMS.find(i=>i.k===k&&i.id===id);
 const FREE=['pal:auto','pal:oliva','pal:atardecer','bg:base','frame:none','icon:fire'];
 
 /* ============ Estado ============ */
+const APP_VERSION='2026.09.21.2';
+let UPD=null;
 const KEY='presente:v1';
 const defaults=()=>({v:1,name:'',checkins:{},coins:0,owned:FREE.slice(),
   equip:{pal:'auto',bg:'base',icon:'fire',frame:'none',coll:'',theme:''},
   log:[],later:[],refl:{},stamps:[],chapters:{},dev:{reflNow:false},
   custom:[],edits:{},hidden:[],backup:{last:null,snooze:null},prefs:{haptics:true,sound:false,calm:false},seen:{sem:'',mes:''},
-  tune:{},catTune:{},forgot:[],combos:[],intents:{sem:null,mes:null,anio:null},hard:{},pulse:{},birthday:'',exp:null,exitQ:{last:null,snooze:null,log:[]},reenc:{},sugLog:[],endowed:false});
+  tune:{},catTune:{},forgot:[],combos:[],intents:{sem:null,mes:null,anio:null},hard:{},pulse:{},birthday:'',exp:null,exitQ:{last:null,snooze:null,log:[]},reenc:{},sugLog:[],endowed:false,meta:{ver:'',notice:false,prevVer:'',lastCheck:0}});
 let S=load();
 rebuildMissions();
 function load(){
   const d=defaults();
-  try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);return normalize(o);}}catch(e){}
-  return normalize(d);
+  try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r),m=normalize(o),pv=(o.meta&&o.meta.ver)||'';
+    if(pv!==APP_VERSION){UPD={from:pv,raw:r};m.meta.notice=true;m.meta.prevVer=pv;try{localStorage.setItem(KEY+':prev',r);}catch(e){}}
+    m.meta.ver=APP_VERSION;return m;}}catch(e){}
+  const nm=normalize(d);nm.meta.ver=APP_VERSION;return nm;
 }
 function normalize(o){
   const m=Object.assign(defaults(),o||{});
@@ -762,6 +782,7 @@ function normalize(o){
   ['tune','catTune','hard','pulse','reenc'].forEach(k=>{if(!m[k]||typeof m[k]!=='object'||Array.isArray(m[k]))m[k]={};});
   ['forgot','combos','sugLog'].forEach(k=>{if(!Array.isArray(m[k]))m[k]=[];});
   if(typeof m.birthday!=='string')m.birthday='';
+  m.meta=Object.assign({ver:'',notice:false,prevVer:'',lastCheck:0},(o&&o.meta)||{});
   FREE.forEach(f=>{if(m.owned.indexOf(f)<0)m.owned.push(f);});
   if(!m.endowed){CATS.forEach(c=>{if(!m.stamps.some(k=>k.indexOf(c.id+':')===0))m.stamps.push(c.id+':'+rnd(8));});m.endowed=true;}
   return m;
@@ -772,12 +793,15 @@ const owns=(k,id)=>S.owned.indexOf(k+':'+id)>=0;
 /* Fotos en IndexedDB */
 let db=null;const PH={};
 function idbOpen(){return new Promise(res=>{try{const r=indexedDB.open('presente-fotos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>{db=r.result;res();};r.onerror=()=>res();r.onblocked=()=>res();}catch(e){res();}});}
-function idbAll(){return new Promise(res=>{if(!db)return res();try{const rq=db.transaction('p').objectStore('p').openCursor();rq.onsuccess=()=>{const c=rq.result;if(c){PH[c.key]=c.value;c.continue();}else res();};rq.onerror=()=>res();}catch(e){res();}});}
+const SNAPS={};
+function idbPutRaw(k,v){if(!db)return;try{db.transaction('p','readwrite').objectStore('p').put(v,k);}catch(e){}}
+function idbDelRaw(k){if(!db)return;try{db.transaction('p','readwrite').objectStore('p').delete(k);}catch(e){}}
+function idbAll(){return new Promise(res=>{if(!db)return res();try{const rq=db.transaction('p').objectStore('p').openCursor();rq.onsuccess=()=>{const c=rq.result;if(c){if(String(c.key).indexOf('snap:')===0)SNAPS[c.key]=c.value;else PH[c.key]=c.value;c.continue();}else res();};rq.onerror=()=>res();}catch(e){res();}});}
 function idbPut(k,v){PH[k]=v;if(!db)return;try{db.transaction('p','readwrite').objectStore('p').put(v,k);}catch(e){}}
 function idbDel(k){delete PH[k];if(!db)return;try{db.transaction('p','readwrite').objectStore('p').delete(k);}catch(e){}}
 
 /* Estado de interfaz */
-const U={tab:'hoy',cat:null,t:null,deck:null,sh:null,f:{},skipCI:false,ciOpen:false,mView:'mes',wOff:0,mOff:0,sView:'sem',sOff:0,day:today(),lastTab:null,scrollTo:null,resetScroll:false,confirmReset:false,sug:null,sugN:0,ed:null,edCat:null,cfDel:null,story:null,img:null,imp:null,ciGap:0,hardMore:false,fr:null,pl:null,cb:null,cfCombo:null,cfExp:false,retM:null,retKey:'',retDone:''};
+const U={tab:'hoy',cat:null,t:null,deck:null,sh:null,f:{},skipCI:false,ciOpen:false,mView:'mes',wOff:0,mOff:0,sView:'sem',sOff:0,day:today(),lastTab:null,scrollTo:null,resetScroll:false,confirmReset:false,sug:null,sugN:0,ed:null,edCat:null,cfDel:null,story:null,img:null,imp:null,ciGap:0,hardMore:false,fr:null,pl:null,cb:null,cfCombo:null,cfExp:false,retM:null,retKey:'',retDone:'',hist:[],parent:null,reopen:null,newVer:null};
 
 /* ============ Cálculos ============ */
 function firstDay(){const k=Object.keys(S.checkins).sort();return k[0]||null;}
@@ -883,24 +907,37 @@ function momentSug(){
   U.sug={key:key,items:items};return U.sug;
 }
 
+const EPOCH='2026-01-05';
 const SEASONS=[
  {id:'hojas',n:'Temporada de las hojas',cat:'presencia',theme:'otono',line:'Bajar el ritmo y notar lo que cae y lo que se queda.'},
  {id:'lluvia',n:'Temporada de la lluvia',cat:'calma',theme:'lluvia',line:'Pausas largas, luz baja y nada de prisa.'},
  {id:'atardecer',n:'Temporada del atardecer',cat:'disfrute',theme:'atardecer',line:'Elegir lo que se antoja, sin culpa.'},
- {id:'noche',n:'Temporada de la noche',cat:'creatividad',theme:'urbana',line:'Crear cuando la ciudad se calma.'}
+ {id:'noche',n:'Temporada de la noche',cat:'creatividad',theme:'urbana',line:'Crear cuando la ciudad se calma.'},
+ {id:'nieve',n:'Temporada de la nieve',cat:'cuidado',theme:'nieve',line:'Arroparte, ir despacio y cuidarte con gestos pequeños.'},
+ {id:'flores',n:'Temporada de las flores',cat:'curiosidad',theme:'flores',line:'Preguntar, aprender y dejar que algo florezca.'},
+ {id:'mar',n:'Temporada del mar',cat:'energia',theme:'oceano',line:'Movimiento, aire fresco y respiración larga.'},
+ {id:'luciernagas',n:'Temporada de las luciérnagas',cat:'exploracion',theme:'luciernagas',line:'Salir a mirar con curiosidad cuando baja la luz.'},
+ {id:'estrellas',n:'Temporada de las estrellas',cat:'conexion',theme:'estrellas',line:'Acercarte a quienes quieres, aunque estén lejos.'},
+ {id:'desierto',n:'Temporada del desierto',cat:'valentia',theme:'desierto',line:'Cruzar lo que asusta, paso a paso.'},
+ {id:'aurora',n:'Temporada de la aurora',cat:'presencia',theme:'boreal',line:'Mirar despacio lo que aparece un rato y se va.'},
+ {id:'cafe',n:'Temporada del café',cat:'disfrute',theme:'cafe',line:'Leer, escribir y conversar sin prisa.'}
 ];
-const EPOCH='2026-01-05';
+const SEASON_OFF=4;
+function seasonIdx(d){const days=Math.round((parseD(d||today())-parseD(EPOCH))/86400000),w=Math.floor(days/7);return {w:w,idx:Math.floor(w/4)};}
 function season(d){
-  const days=Math.round((parseD(d||today())-parseD(EPOCH))/86400000),w=Math.floor(days/7),idx=Math.floor(w/4);
-  const base=SEASONS[((idx%4)+4)%4],wk=(((w%4)+4)%4)+1;
-  return Object.assign({},base,{idx:idx,wk:wk,start:addDays(EPOCH,idx*28),end:addDays(EPOCH,idx*28+27)});
+  const r=seasonIdx(d),N=SEASONS.length,i=(((r.idx+SEASON_OFF)%N)+N)%N,base=SEASONS[i],wk=(((r.w%4)+4)%4)+1;
+  return Object.assign({},base,{idx:r.idx,wk:wk,guest:SEASONS[(i+N/2)%N].theme,start:addDays(EPOCH,r.idx*28),end:addDays(EPOCH,r.idx*28+27)});
 }
-function themeAvail(id){return season().theme===id;}
+function themeAvail(id){const s=season();return s.theme===id||s.guest===id;}
 function themeWhen(id){
-  const days=Math.round((parseD(today())-parseD(EPOCH))/86400000),w=Math.floor(days/7),idx=Math.floor(w/4);
-  for(let k=1;k<=4;k++){if(SEASONS[(idx+k)%4].theme===id){const wks=(idx+k)*4-w;return 'Vuelve en '+wks+(wks===1?' semana':' semanas');}}
+  const r=seasonIdx(),N=SEASONS.length;
+  for(let k=1;k<=N;k++){
+    const i=(((r.idx+k+SEASON_OFF)%N)+N)%N;
+    if(SEASONS[i].theme===id||SEASONS[(i+N/2)%N].theme===id){const wks=(r.idx+k)*4-r.w;return 'Vuelve en '+wks+(wks===1?' semana':' semanas');}
+  }
   return 'En otra temporada';
 }
+const THEME_EMO={otono:'🍂',lluvia:'🌧️',atardecer:'🌇',urbana:'🌃',nieve:'❄️',flores:'🌸',oceano:'🫧',luciernagas:'✨',estrellas:'⭐',desierto:'🏜️',boreal:'🌌',cafe:'☕'};
 function hardToday(){
   const t=today();if(S.hard[t]!==undefined)return !!S.hard[t];
   const c=S.checkins[t];return !!(c&&(c.mood===3||c.mood===4));
@@ -1163,6 +1200,14 @@ function returnMission(){
   const pool=ALL.filter(m=>m.t===1&&['calma','presencia','cuidado','energia'].indexOf(m.cat)>=0);
   U.retM=pool.length?wpick(pool,1,m=>weight(m,1))[0]:null;U.retKey=today();return U.retM;
 }
+function goTab(t){
+  if(U.tab!==t){U.hist.push(U.tab);if(U.hist.length>20)U.hist.shift();U.tab=t;}
+  U.resetScroll=true;render();
+}
+function backBar(){
+  const show=U.tab!=='hoy'||U.hist.length>0||!!U.cat;
+  return show?'<div class="backbar"><button class="backbtn" data-a="back">‹ Atrás</button></div>':'';
+}
 function suggestCat(){
   const rated=S.log.filter(e=>e.rate);if(rated.length<3)return null;
   let best=null,bs=.25;CATS.forEach(c=>{const l=rated.filter(e=>e.cat===c.id);if(l.length>=2){const s=catScore(c.id);if(s>bs){bs=s;best=c.id;}}});
@@ -1261,27 +1306,77 @@ if(mq.addEventListener)mq.addEventListener('change',()=>applyTheme());
 const fx={mode:'',parts:[],raf:0,w:0,h:0};
 const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function fxResize(){const cv=$('#fx');const d=Math.min(window.devicePixelRatio||1,2);fx.w=window.innerWidth;fx.h=window.innerHeight;cv.width=fx.w*d;cv.height=fx.h*d;cv.getContext('2d').setTransform(d,0,0,d,0,0);}
+const FXE={leaves:['🍂','🍁'],petals:['🌸','💮','🌼']};
 function mkPart(mode,init){
-  const p={x:Math.random()*fx.w,y:init?Math.random()*fx.h:-30};
-  if(mode==='leaves'){p.s=14+Math.random()*12;p.vy=.35+Math.random()*.7;p.ph=Math.random()*6;p.r=Math.random()*6;p.vr=(Math.random()-.5)*.03;p.e=Math.random()<.5?'🍂':'🍁';}
+  const p={x:Math.random()*fx.w,y:init?Math.random()*fx.h:-30,ph:Math.random()*6};
+  if(FXE[mode]){p.s=14+Math.random()*12;p.vy=.35+Math.random()*.7;p.r=Math.random()*6;p.vr=(Math.random()-.5)*.03;p.e=FXE[mode][rnd(FXE[mode].length)];}
   else if(mode==='rain'){p.l=10+Math.random()*16;p.vy=9+Math.random()*7;p.x=Math.random()*(fx.w+40);}
-  else{p.r=6+Math.random()*24;p.y=init?Math.random()*fx.h:fx.h+30;p.vy=-(.12+Math.random()*.3);p.ph=Math.random()*6;p.col=mode==='bokeh'?['#ff77b7','#6fe0ff','#ffc35a','#a98bff'][rnd(4)]:['#ffd08a','#ff9f7a','#ffe7b0'][rnd(3)];p.a=.08+Math.random()*.16;}
+  else if(mode==='snow'){p.r=1.4+Math.random()*3;p.vy=.4+Math.random();}
+  else if(mode==='bubbles'){p.y=init?Math.random()*fx.h:fx.h+30;p.r=4+Math.random()*16;p.vy=-(.3+Math.random()*.7);}
+  else if(mode==='stars'||mode==='aurora'){p.y=Math.random()*fx.h*(mode==='aurora'?.75:1);p.r=.5+Math.random()*1.5;p.tw=1+Math.random()*3;}
+  else if(mode==='fireflies'){p.y=Math.random()*fx.h;p.r=2+Math.random()*2.5;p.vx=(Math.random()-.5)*.4;p.vy=(Math.random()-.5)*.4;}
+  else if(mode==='dust'){p.y=Math.random()*fx.h;p.r=.8+Math.random()*1.8;p.vx=.3+Math.random()*.9;p.vy=(Math.random()-.5)*.15;}
+  else{p.r=6+Math.random()*24;p.y=init?Math.random()*fx.h:fx.h+30;p.vy=-(.12+Math.random()*.3);p.a=.08+Math.random()*.16;p.col=mode==='bokeh'?['#ff77b7','#6fe0ff','#ffc35a','#a98bff'][rnd(4)]:['#ffd08a','#ff9f7a','#ffe7b0'][rnd(3)];}
   return p;
 }
 function fxLoop(){
-  const cv=$('#fx'),c=cv.getContext('2d');c.clearRect(0,0,fx.w,fx.h);const t=performance.now()/1000;
+  const c=$('#fx').getContext('2d');c.clearRect(0,0,fx.w,fx.h);
+  const t=performance.now()/1000,m=fx.mode;
+  if(m==='aurora'){
+    const cols=['#5cf2b0','#4fb8ff','#a678ff'];
+    for(let k=0;k<3;k++){
+      c.save();c.globalAlpha=.12;c.lineWidth=90+k*20;c.lineCap='round';
+      const g=c.createLinearGradient(0,0,fx.w,0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,cols[k]);g.addColorStop(1,'rgba(0,0,0,0)');c.strokeStyle=g;
+      c.beginPath();
+      for(let x=-20;x<=fx.w+20;x+=24){const y=fx.h*.22+k*70+Math.sin(x*.006+t*.25+k*1.7)*55+Math.sin(x*.013+t*.4)*20;if(x===-20)c.moveTo(x,y);else c.lineTo(x,y);}
+      c.stroke();c.restore();
+    }
+  }
   fx.parts.forEach((p,i)=>{
-    if(fx.mode==='leaves'){p.y+=p.vy;p.x+=Math.sin(t+p.ph)*.6;p.r+=p.vr;if(p.y>fx.h+30)fx.parts[i]=mkPart('leaves');c.save();c.translate(p.x,p.y);c.rotate(p.r+Math.sin(t*.8+p.ph)*.4);c.globalAlpha=.75;c.font=p.s+'px serif';c.textAlign='center';c.fillText(p.e,0,0);c.restore();}
-    else if(fx.mode==='rain'){p.y+=p.vy;p.x-=1.4;if(p.y>fx.h+20)fx.parts[i]=mkPart('rain');c.strokeStyle='rgba(190,220,255,.32)';c.lineWidth=1.1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-1.6,p.y+p.l);c.stroke();}
-    else{p.y+=p.vy;p.x+=Math.sin(t*.4+p.ph)*.25;if(p.y<-40)fx.parts[i]=mkPart(fx.mode);const a=p.a*(.7+.3*Math.sin(t+p.ph));const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);g.addColorStop(0,p.col);g.addColorStop(1,'transparent');c.globalAlpha=a*2.4;c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();c.globalAlpha=1;}
+    if(FXE[m]){
+      p.y+=p.vy;p.x+=Math.sin(t+p.ph)*.6;p.r+=p.vr;if(p.y>fx.h+30)fx.parts[i]=mkPart(m);
+      c.save();c.translate(p.x,p.y);c.rotate(p.r+Math.sin(t*.8+p.ph)*.4);c.globalAlpha=.75;c.font=p.s+'px serif';c.textAlign='center';c.fillText(p.e,0,0);c.restore();
+    }else if(m==='rain'){
+      p.y+=p.vy;p.x-=1.4;if(p.y>fx.h+20)fx.parts[i]=mkPart('rain');
+      c.strokeStyle='rgba(190,220,255,.32)';c.lineWidth=1.1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-1.6,p.y+p.l);c.stroke();
+    }else if(m==='snow'){
+      p.y+=p.vy;p.x+=Math.sin(t*.7+p.ph)*.5;if(p.y>fx.h+10)fx.parts[i]=mkPart('snow');
+      c.save();c.shadowColor='rgba(70,110,160,.55)';c.shadowBlur=5;c.fillStyle='rgba(255,255,255,.96)';c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();c.restore();
+    }else if(m==='bubbles'){
+      p.y+=p.vy;p.x+=Math.sin(t+p.ph)*.4;if(p.y<-30)fx.parts[i]=mkPart('bubbles');
+      c.strokeStyle='rgba(220,250,255,.5)';c.fillStyle='rgba(220,250,255,.08)';c.lineWidth=1.2;c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();c.stroke();
+    }else if(m==='stars'||m==='aurora'){
+      const a=.3+.7*Math.abs(Math.sin(t*p.tw*.5+p.ph));c.fillStyle='rgba(255,255,255,'+(a*.9).toFixed(2)+')';c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();
+    }else if(m==='fireflies'){
+      p.x+=p.vx+Math.sin(t*.6+p.ph)*.3;p.y+=p.vy+Math.cos(t*.5+p.ph)*.3;
+      if(p.x<-10)p.x=fx.w+10;if(p.x>fx.w+10)p.x=-10;if(p.y<-10)p.y=fx.h+10;if(p.y>fx.h+10)p.y=-10;
+      const a=.3+.7*Math.abs(Math.sin(t*1.3+p.ph)),g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*6);
+      g.addColorStop(0,'rgba(230,255,120,'+(a*.9).toFixed(2)+')');g.addColorStop(1,'rgba(230,255,120,0)');c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.r*6,0,7);c.fill();
+    }else if(m==='dust'){
+      p.x+=p.vx;p.y+=p.vy;if(p.x>fx.w+5){p.x=-5;p.y=Math.random()*fx.h;}
+      c.fillStyle='rgba(170,105,55,.35)';c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();
+    }else{
+      p.y+=p.vy;p.x+=Math.sin(t*.4+p.ph)*.25;if(p.y<-40)fx.parts[i]=mkPart(fx.mode);
+      const a=p.a*(.7+.3*Math.sin(t+p.ph)),g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+      g.addColorStop(0,p.col);g.addColorStop(1,'transparent');c.globalAlpha=a*2.4;c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill();c.globalAlpha=1;
+    }
   });
+  if(m==='stars'){
+    if(!fx.shoot&&Math.random()<.0025)fx.shoot={x:Math.random()*fx.w*.8+fx.w*.1,y:Math.random()*fx.h*.4,l:0};
+    if(fx.shoot){
+      const s=fx.shoot;s.l++;
+      const x0=s.x+(s.l-14)*7,y0=s.y+(s.l-14)*3.2,x1=s.x+s.l*7,y1=s.y+s.l*3.2,g=c.createLinearGradient(x0,y0,x1,y1);
+      g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(255,255,255,.9)');c.strokeStyle=g;c.lineWidth=1.6;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();
+      if(s.l>60)fx.shoot=null;
+    }
+  }
   fx.raf=requestAnimationFrame(fxLoop);
 }
 function setFx(mode){
-  if(fx.mode===mode)return;fx.mode=mode;cancelAnimationFrame(fx.raf);fxResize();
+  if(fx.mode===mode)return;fx.mode=mode;fx.shoot=null;cancelAnimationFrame(fx.raf);fxResize();
   const c=$('#fx').getContext('2d');c.clearRect(0,0,fx.w,fx.h);
   if(!mode||reduced){fx.parts=[];return;}
-  const n=mode==='rain'?70:mode==='leaves'?20:22;
+  const n={rain:70,leaves:20,petals:18,snow:70,bubbles:26,stars:80,aurora:50,fireflies:26,dust:60}[mode]||22;
   fx.parts=[];for(let i=0;i<n;i++)fx.parts.push(mkPart(mode,true));
   fxLoop();
 }
@@ -1323,6 +1418,7 @@ function render(){
   if(S.prefs.calm&&U.tab==='tie')U.tab='hoy';
   let body='';
   if(U.tab==='hoy')body=viewHoy();else if(U.tab==='mom')body=viewMom();else if(U.tab==='col')body=viewCol();else if(U.tab==='res')body=viewRes();else body=viewTie();
+  body=backBar()+body;
   app.innerHTML='<main id="main"><div class="wrap">'+body+'</div></main><nav id="nav" class="glass" aria-label="Secciones">'+TABS.filter(t=>!(S.prefs.calm&&t[0]==='tie')).map(t=>'<button data-a="tab" data-v="'+t[0]+'" class="'+(U.tab===t[0]?'on':'')+'" aria-label="'+t[1]+'">'+SV[t[0]]+'<span>'+t[1]+'</span></button>').join('')+'</nav>';
   const m=$('#main');
   if(U.resetScroll||U.lastTab!==U.tab)m.scrollTop=0;else m.scrollTop=st;
@@ -1351,7 +1447,7 @@ function viewCI(){
   }
   const sub=lit?'':(gap===1?'Ayer fue una brasa. Hoy la reavivas.':gap>=2?'Fueron '+gap+' días de brasa. Nada se apagó.':'');
   const hint=gap===1?'Tu brasa sigue tibia. Mantén presionado para reavivarla':gap>1?'Tus '+gap+' brasas siguen tibias. Mantén presionado para reavivarlas':'Mantén presionado para encender el día';
-  return '<section class="ci"><p class="date">'+dateLong(now)+'</p><h1>'+greeting()+(S.name?', '+esc(S.name):'')+'</h1>'+(sub?'<p class="sub">'+sub+'</p>':'')
+  return '<section class="ci">'+(lit?'':'<button class="backbtn ciback" data-a="back">‹ Atrás</button>')+updateNoteCI()+'<p class="date">'+dateLong(now)+'</p><h1>'+greeting()+(S.name?', '+esc(S.name):'')+'</h1>'+(sub?'<p class="sub">'+sub+'</p>':'')
    +'<div class="orbwrap" id="orbwrap"><i class="ring"></i><i class="ring r2"></i><i class="ring r3"></i>'+em
    +'<button class="orb'+(lit?' lit':'')+'" id="orb" aria-label="Encender el día. Mantén presionado o pulsa Enter."><svg class="prog" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" pathLength="100" id="prog"'+(lit?' style="stroke-dashoffset:0"':'')+'/></svg><span class="glyph">'+ic+'</span></button>'
    +'<div class="sparks" id="sparks"></div></div>'
@@ -1453,7 +1549,7 @@ const HARD_PH=['Hoy bastó con esto.','Un minuto también cuenta.','Cuidarte hoy
 function viewHoy(){
   const t=today(),now=new Date(),h=now.getHours(),calm=S.prefs.calm,hard=hardToday()&&!U.hardMore;
   let o='<header class="top"><div><p class="date">'+dateLong(now)+'</p><h1>'+greeting()+(S.name?', '+esc(S.name):'')+'</h1></div><div class="tr">'+(calm?'':'<button class="coin" data-a="tab" data-v="tie" aria-label="Monedas">🪙 <b>'+S.coins+'</b></button>')+'<button class="gear" data-a="settings" aria-label="Ajustes">'+SV.gear+'</button></div></header>';
-  o+=streakCard()+sugCard()+weekCard();
+  o+=updateCards()+streakCard()+sugCard()+weekCard();
   const last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate()===now.getDate();
   if(now.getDay()===0)o+='<button class="banner glass" data-a="storyOpen" data-kind="sem" data-off="0"><span class="bi">🌾</span><span><b>Tu resumen de la semana está listo</b><span class="s">Míralo con calma, sin prisa.</span></span></button>';
   if(last)o+='<button class="banner glass" data-a="storyOpen" data-kind="mes" data-off="0"><span class="bi">📖</span><span><b>Tu capítulo del mes está listo</b><span class="s">Un cierre suave de este mes.</span></span></button>';
@@ -1649,7 +1745,7 @@ function openColl(id){
   if(got===8)o+='<p class="tiny" style="text-align:center;margin-top:8px">Álbum completo ✨ Las nuevas estampillas ahora salen de otros álbumes.</p>';
   if(lk.length)o+='<h3>Lo que más disfrutas</h3>'+lk.map(t=>'<p style="margin:6px 0">❤️ '+esc(t)+'</p>').join('');
   if(moms.length)o+='<h3>Tus momentos</h3><div class="mosaic">'+moms.map((e,i)=>tileFor(e,i)).join('')+'</div>';
-  U.sh={kind:'coll'};openSheet(o);
+  U.sh={kind:'coll'};openSheet(o);U.reopen=()=>openColl(id);
 }
 
 /* ============ Resumen ============ */
@@ -1731,7 +1827,7 @@ function preview(it){
   const g=c=>'background:linear-gradient(135deg,'+c[0]+','+c[1]+','+c[2]+','+c[3]+')';
   if(it.k==='theme'||it.k==='bg'||it.k==='pal'){
     if(!it.c)return '<div class="pv glass" style="font-size:22px">'+(it.k==='pal'?'🌗':'✦')+'</div>';
-    return '<div class="pv" style="'+g(it.c)+'">'+(it.fx==='leaves'?'🍂':it.fx==='rain'?'🌧️':it.fx==='bokeh'?'🌃':it.fx==='glow'?'🌇':'')+'</div>';
+    return '<div class="pv" style="'+g(it.c)+'">'+(THEME_EMO[it.id]||'')+'</div>';
   }
   if(it.k==='icon')return '<div class="pv glass">'+it.e+'</div>';
   if(it.k==='frame')return '<div class="pv glass"><div class="ph'+(it.id!=='none'?' fr-'+it.id:'')+'"><div class="fake"></div></div></div>';
@@ -1742,7 +1838,8 @@ function preview(it){
 function viewTie(){
   let o='<h1 style="margin-bottom:14px">Tienda</h1><section class="glass wallet"><div><b>'+S.coins+'</b> <span class="soft">monedas</span><p class="tiny" style="margin-top:4px">Las monedas llegan solas cuando vives una misión. Sirven para decorar.</p></div><span style="font-size:38px">🪙</span></section>';
   SECS.forEach(sc=>{
-    const list=ITEMS.filter(i=>i.k===sc[0]);
+    let list=ITEMS.filter(i=>i.k===sc[0]);
+    if(sc[0]==='theme')list=list.slice().sort((a,b)=>((themeAvail(a.id)?0:owns('theme',a.id)?1:2)-(themeAvail(b.id)?0:owns('theme',b.id)?1:2)));
     o+='<section class="sec"><h2>'+sc[1]+'</h2>'+(sc[2]?'<p class="tiny" style="margin:-6px 0 10px">'+sc[2]+'</p>':'')+'<div class="hscroll">'+list.map(it=>{
       const own=owns(it.k,it.id)||it.p===0,eq=isEq(it);
       let btn;
@@ -1752,7 +1849,7 @@ function viewTie(){
       else if(it.k==='chap')btn='<button class="btn ghost" disabled style="opacity:.7">Tuyo</button>';
       else if(it.k==='page')btn='<button class="btn ghost" disabled style="opacity:.7">Desbloqueado</button>';
       else btn='<button class="btn'+(eq?' ghost':'')+'" data-a="equip" data-k="'+it.k+'" data-id="'+it.id+'">'+(eq?(it.k==='theme'||it.k==='coll'?'Quitar':'En uso'):(it.k==='theme'?'Activar':'Usar'))+'</button>';
-      return '<div class="item glass'+(eq?' eq':'')+'">'+preview(it)+'<b>'+esc(it.n)+'</b><small>'+esc(it.k==='theme'&&themeAvail(it.id)?'De esta temporada':(it.d||''))+'</small>'+btn+'</div>';
+      return '<div class="item glass'+(eq?' eq':'')+'">'+preview(it)+'<b>'+esc(it.n)+'</b><small>'+esc(it.k==='theme'&&themeAvail(it.id)?(season().theme===it.id?'De esta temporada':'Invitado de la temporada'):(it.d||''))+'</small>'+btn+'</div>';
     }).join('')+'</div></section>';
   });
   return o;
@@ -1785,16 +1882,18 @@ function equipItem(k,id,silent){
 
 /* ============ Sheets ============ */
 function openSheet(html,cls){
+  const prev=$('.sheet-wrap:not(.out)')?U.reopen:null;
   $$('.sheet-wrap').forEach(x=>x.remove());
+  U.parent=prev||null;U.reopen=null;
   const el=document.createElement('div');el.className='sheet-wrap';
-  el.innerHTML='<div class="scrim" data-a="closeSheet"></div><div class="sheet '+(cls||'')+'" role="dialog" aria-modal="true"><div class="grab"></div><div class="sbody" id="sbody">'+html+'</div></div>';
+  el.innerHTML='<div class="scrim" data-a="closeSheet"></div><div class="sheet '+(cls||'')+'" role="dialog" aria-modal="true"><div class="grab"></div><div class="shead"><button class="backbtn" data-a="back">‹ Atrás</button></div><div class="sbody" id="sbody">'+html+'</div></div>';
   document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));
 }
 function closeSheet(){
   const el=$('.sheet-wrap:not(.out)');if(!el)return;
   if(U.sh&&U.sh.kind==='complete')finalizeComplete();
   el.classList.add('out');el.classList.remove('in');setTimeout(()=>el.remove(),320);
-  U.sh=null;render();
+  U.parent=null;U.reopen=null;U.sh=null;render();
 }
 function openDay(d){
   const dt=parseD(d),list=S.log.filter(e=>e.d===d);
@@ -1803,7 +1902,7 @@ function openDay(d){
   o+=mom.map(e=>'<button class="mom big" style="margin-top:12px;width:100%" data-a="moment" data-id="'+e.id+'">'+momentBody(e,true)+'<span class="ft"><span>'+CAT[e.cat].e+' '+esc(e.m)+'</span><span>'+(e.rate?RE[e.rate]:'')+'</span></span></button>').join('');
   if(rest.length)o+='<h3>Sin momento guardado</h3>'+rest.map(e=>'<p style="margin:6px 0">'+CAT[e.cat].e+' '+esc(e.m)+' '+(e.rate?RE[e.rate]:'')+'</p>').join('');
   if(S.refl[d])o+='<h3>Reflexión</h3><p>'+FACE[S.refl[d].r-1]+' '+FWORD[S.refl[d].r-1]+(S.refl[d].note?'. “'+esc(S.refl[d].note)+'”':'')+'</p>';
-  U.sh={kind:'day'};openSheet(o);
+  U.sh={kind:'day'};openSheet(o);U.reopen=()=>openDay(d);
 }
 function openMoment(id){
   const e=S.log.find(x=>x.id===id);if(!e)return;
@@ -1847,7 +1946,9 @@ function openSettings(){
    +'<h3>Respaldo</h3><p class="tiny" id="bklast" style="margin-bottom:8px">'+lastBackupText()+'</p>'
    +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-a="exportFile">'+(share?'Guardar respaldo':'Descargar respaldo')+'</button><label class="btn ghost sm" style="cursor:pointer">Restaurar desde archivo<input type="file" id="bfile" accept=".json,application/json" class="sr"></label><button class="btn ghost sm" data-a="exportText">Copiar texto</button><button class="btn ghost sm" data-a="importPaste">Pegar texto</button></div>'
    +'<div id="backup"></div><p class="tiny" style="margin-top:8px">Tus datos viven solo en este dispositivo. El respaldo incluye tus fotos, misiones y combos.</p>'
+   +'<h3>Versión</h3><p class="tiny" style="margin-bottom:8px">Presente '+APP_VERSION+'. Cuando se actualizan los archivos de la app, tus datos no se borran: viven en tu dispositivo, aparte de la app. Antes de cada actualización guardo una copia automática.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" data-a="checkUpd">Buscar actualización</button><button class="btn ghost sm" data-a="whatsNew">Novedades</button>'+(prevRaw()?'<button class="btn ghost sm" data-a="restorePrev">Volver a la copia previa</button>':'')+'</div>'
    +'<h3>Empezar de cero</h3><button class="btn ghost sm" id="rbtn" data-a="resetAll">Borrar todo</button>');
+  U.reopen=openSettings;
 }
 
 /* ============ Misiones propias ============ */
@@ -2040,7 +2141,7 @@ function openStory(kind,off){
   $$('.story').forEach(x=>x.remove());
   const el=document.createElement('div');el.className='story';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
   el.setAttribute('aria-label',kind==='sem'?'Resumen de la semana':'Cierre del mes');
-  el.innerHTML='<div class="st-prog">'+cards.map(()=>'<i></i>').join('')+'</div><button class="st-x" data-a="storyClose" aria-label="Cerrar">×</button><div class="st-body" id="stbody"></div><div class="st-tap"><button class="p" data-a="storyPrev" aria-label="Anterior"></button><button class="n" data-a="storyNext" aria-label="Siguiente"></button></div><div class="st-foot" id="stfoot"></div>';
+  el.innerHTML='<div class="st-prog">'+cards.map(()=>'<i></i>').join('')+'</div><button class="backbtn st-back" data-a="back">‹ Atrás</button><button class="st-x" data-a="storyClose" aria-label="Cerrar">×</button><div class="st-body" id="stbody"></div><div class="st-tap"><button class="p" data-a="storyPrev" aria-label="Anterior"></button><button class="n" data-a="storyNext" aria-label="Siguiente"></button></div><div class="st-foot" id="stfoot"></div>';
   document.body.appendChild(el);storyShow(0);
 }
 function storyShow(i){
@@ -2148,11 +2249,44 @@ async function renderShare(){
 function refreshCombo(keep){const b=$('#sbody');if(!b||!U.cb)return;const st=b.scrollTop;b.innerHTML=comboHTML();b.scrollTop=keep?st:0;}
 function refreshLearn(){const b=$('#sbody');if(!b)return;const st=b.scrollTop;b.innerHTML=learnHTML();b.scrollTop=st;}
 
+const CHANGELOG=[
+ 'Botón “Atrás” en cada pantalla, pensado para iPhone.',
+ '8 temas nuevos que rotan cada temporada: nieve, flores, mar, luciérnagas, estrellas, desierto, aurora y café.',
+ 'Aviso al actualizar y copia automática de tus datos antes de cada cambio de versión.'
+];
+function prevRaw(){
+  try{const r=localStorage.getItem(KEY+':prev');if(r)return r;}catch(e){}
+  const ks=Object.keys(SNAPS).sort();return ks.length?SNAPS[ks[ks.length-1]]:null;
+}
+function updateCards(){
+  let o='';
+  if(S.meta.notice){
+    o+='<section class="glass card upd"><b>✨ Presente se actualizó</b><p class="soft" style="font-size:14.5px;margin:4px 0 10px">Versión '+APP_VERSION+'. Tus datos siguen aquí: '+Object.keys(S.checkins).length+' '+(Object.keys(S.checkins).length===1?'día encendido':'días encendidos')+', '+S.log.length+' '+(S.log.length===1?'misión':'misiones')+' y '+Object.keys(PH).length+' '+(Object.keys(PH).length===1?'foto':'fotos')+'. Hice una copia por si acaso.</p><div class="macts"><button class="btn sm" data-a="whatsNew">Ver novedades</button><button class="btn ghost sm" data-a="noticeOk">Entendido</button></div></section>';
+  }
+  if(U.newVer){
+    o+='<section class="glass card upd"><b>Hay una versión nueva</b><p class="soft" style="font-size:14.5px;margin:4px 0 10px">Se instala al recargar. Tus datos no se tocan.</p><div class="macts"><button class="btn sm" data-a="applyUpdate">Actualizar ahora</button><button class="btn ghost sm" data-a="newLater">Después</button></div></section>';
+  }
+  return o;
+}
+function updateNoteCI(){
+  if(!S.meta.notice&&!U.newVer)return '';
+  return '<div class="updci glass"><span>'+(S.meta.notice?'✨ Presente se actualizó. Tus datos siguen aquí.':'Hay una versión nueva disponible.')+'</span><button class="link" data-a="'+(S.meta.notice?'noticeOk':'newLater')+'">'+(S.meta.notice?'Entendido':'Después')+'</button></div>';
+}
+async function checkUpdate(manual){
+  if(location.protocol.indexOf('http')!==0){if(manual)toast('Solo funciona con la app publicada.');return;}
+  try{
+    const r=await fetch('./index.html?v='+Date.now(),{cache:'no-store'}),t=await r.text(),m=t.match(/const APP_VERSION='([^']+)'/);
+    if(!m){if(manual)toast('No pude comprobarlo.');return;}
+    S.meta.lastCheck=Date.now();save();
+    if(m[1]!==APP_VERSION){U.newVer=m[1];render();if(manual)toast('Hay una versión nueva.');}
+    else if(manual)toast('Ya tienes la última versión.');
+  }catch(e){if(manual)toast('No pude comprobarlo. ¿Hay conexión?');}
+}
 /* ============ Acciones ============ */
 const A={
- tab(el){U.tab=el.dataset.v;U.resetScroll=true;render();},
- goRes(el){U.tab='res';U.sView=el.dataset.v;U.sOff=0;render();},
- goTie(){closeSheet();U.tab='tie';render();},
+ tab(el){goTab(el.dataset.v);},
+ goRes(el){U.sView=el.dataset.v;U.sOff=0;goTab('res');},
+ goTie(){closeSheet();goTab('tie');},
  skipCI(){U.skipCI=true;render();},
  openCI(){U.skipCI=false;render();},
  mood(el){const c=S.checkins[today()];if(!c)return;const v=+el.dataset.v;c.mood=c.mood===v?null:v;save();$$('.ci-after .chip').forEach((b,i)=>b.classList.toggle('on',c.mood===i));},
@@ -2186,6 +2320,27 @@ const A={
  buy(el){buy(el.dataset.k,el.dataset.id);},
  equip(el){equipItem(el.dataset.k,el.dataset.id);save();render();},
  settings(){openSettings();},
+ back(){
+  if($('.sheet-wrap:not(.out)')){const f=U.parent;if(f){U.parent=null;U.reopen=null;f();}else closeSheet();return;}
+  if(U.story){A.storyBack();return;}
+  if(showCI()){const o=$('#orb');if(o&&!o.classList.contains('lit'))A.skipCI();return;}
+  if(U.tab==='hoy'&&U.cat){if(U.t){U.t=null;U.deck=null;}else U.cat=null;render();return;}
+  if(U.hist.length){U.tab=U.hist.pop();U.resetScroll=true;render();return;}
+  if(U.tab!=='hoy'){U.tab='hoy';U.resetScroll=true;render();}
+ },
+ storyBack(){const s=U.story;if(!s)return;if(s.i>0)storyShow(s.i-1);else A.storyClose();},
+ whatsNew(){U.sh={kind:'news'};openSheet('<h2>Novedades</h2><p class="soft" style="margin-bottom:10px">Versión '+APP_VERSION+'</p>'+CHANGELOG.map(x=>'<p style="margin:10px 0">✨ '+x+'</p>').join('')+'<p class="tiny" style="margin-top:14px">Tus datos no se tocaron: viven en tu dispositivo, aparte de los archivos de la app.</p><button class="btn wide" style="margin-top:14px" data-a="closeSheet">Listo</button>');},
+ noticeOk(){S.meta.notice=false;save();render();},
+ newLater(){U.newVer=null;render();},
+ applyUpdate(){save();toast('Actualizando…');setTimeout(()=>location.reload(),200);},
+ checkUpd(){checkUpdate(true);},
+ restorePrev(el){
+  if(el.dataset.cf!=='1'){el.dataset.cf='1';el.textContent='Toca otra vez: lo hecho después se pierde';return;}
+  const raw=prevRaw();if(!raw){toast('No hay copia guardada.');return;}
+  try{const o=JSON.parse(raw);S=normalize(o);S.meta.ver=APP_VERSION;S.meta.notice=false;rebuildMissions();U.deck=null;U.sug=null;U.cat=null;U.t=null;save();toast('Copia restaurada.');closeSheet();}
+  catch(e){toast('No pude leer la copia.');}
+ },
+
  hardOn(){S.hard[today()]=true;U.hardMore=false;U.sug=null;save();render();},
  hardOff(){S.hard[today()]=false;U.sug=null;save();render();},
  hardMore(){U.hardMore=true;U.sug=null;render();},
@@ -2340,7 +2495,7 @@ const A={
  saveName(){S.name=(U.f.name||'').trim();save();toast('Listo');closeSheet();},
  resetAll(el){
   if(!U.confirmReset){U.confirmReset=true;el.textContent='Toca otra vez para borrar todo';return;}
-  Object.keys(PH).forEach(idbDel);S=normalize(defaults());rebuildMissions();U.sug=null;save();U.cat=null;U.t=null;U.deck=null;U.skipCI=false;U.ciOpen=false;U.tab='hoy';closeSheet();
+  Object.keys(PH).forEach(idbDel);Object.keys(SNAPS).forEach(k=>{idbDelRaw(k);delete SNAPS[k];});try{localStorage.removeItem(KEY+':prev');}catch(e){}S=normalize(defaults());rebuildMissions();U.sug=null;save();U.cat=null;U.t=null;U.deck=null;U.skipCI=false;U.ciOpen=false;U.tab='hoy';closeSheet();
  }
 };
 const QUIET=new Set(['done','sugDone','laterDo','buy','saveRefl','storyNext','storyPrev','closeSheet','testFx','exportFile']);
@@ -2380,13 +2535,20 @@ document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&U.day!==today()){U.day=today();U.skipCI=false;U.ciOpen=false;U.mOff=0;U.wOff=0;U.sOff=0;U.sug=null;U.sugN=0;render();}
 });
 
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-(S.meta.lastCheck||0)>6*3600*1000)checkUpdate(false);});
+
 /* ============ Arranque ============ */
 if(!document.querySelector('link[rel=apple-touch-icon]'))makeIcon();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(function(){});}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
 Promise.race([idbOpen().then(idbAll),new Promise(r=>setTimeout(r,2500))]).then(()=>{
-  // Migrar el respaldo de fotos huérfanas no es necesario: se cargan por clave
-  render();
+  if(UPD){
+    const k='snap:'+String(Date.now())+'@'+(UPD.from||'anterior');SNAPS[k]=UPD.raw;idbPutRaw(k,UPD.raw);
+    const ks=Object.keys(SNAPS).sort();while(ks.length>2){const old=ks.shift();delete SNAPS[old];idbDelRaw(old);}
+    UPD=null;
+  }
+  save();render();
+  setTimeout(()=>checkUpdate(false),4000);
 });
 })();
 </script>
