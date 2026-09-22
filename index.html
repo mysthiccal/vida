@@ -584,11 +584,37 @@ p.enrow{margin:8px 2px}
 .brow .bar i{background:var(--accent)}
 .mom.big{display:block;text-align:left}
 .modes{grid-template-columns:repeat(4,1fr)}
+/* ---- Fase 7: cozy ---- */
+#daytint{position:fixed;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:soft-light;opacity:var(--daytint-op,0);background:var(--daytint-color,transparent);transition:opacity 4s ease,background 4s ease}
+#grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:140px 140px}
+#bg{animation:flicker 9s ease-in-out infinite}
+@keyframes flicker{0%{filter:brightness(1)}18%{filter:brightness(1.014)}32%{filter:brightness(.992)}54%{filter:brightness(1.018)}71%{filter:brightness(.995)}100%{filter:brightness(1.007)}}
+@keyframes rise{0%{opacity:0;transform:translateY(16px) scale(.98)}62%{opacity:1;transform:translateY(-3px) scale(1.006)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.sheet-wrap .sheet{transition:transform .38s cubic-bezier(.2,.8,.2,1)}
+.mcard{animation-duration:.52s}
+.ci-after{animation-duration:.82s}
+.earn{animation-duration:.58s;animation-delay:.78s}
+.lvl{animation-duration:.58s;animation-delay:.92s}
+.btn{transition:transform .18s}
+.cat{transition:transform .18s,box-shadow .24s}
+.chip{transition:transform .18s,background .24s}
+.daynote{color:var(--ink2);font-size:13.5px;margin-top:2px}
+.nook{margin-top:10px;font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.sk-ic{position:relative}
+.heatwrap{position:absolute;left:50%;top:-2px;width:0;height:0;pointer-events:none}
+.heat{position:absolute;left:0;top:0;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,140,.6),transparent 70%);animation:heatrise 3.2s var(--hd,0s) ease-in infinite}
+@keyframes heatrise{0%{transform:translate(var(--hx,0),4px) scale(.5);opacity:0}22%{opacity:.75}100%{transform:translate(calc(var(--hx,0) * 2.2),-32px) scale(1.3);opacity:0}}
+.streak{position:relative;overflow:hidden}
+.streak::before{content:"";position:absolute;left:16px;right:16px;top:0;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--nook,var(--accent)),transparent);opacity:.5}
+.ccard,.banner,.tool,.item,.mode,.chk,.edbtn,.coin,.gear,.stbtn,.tile,.mom{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.ccard:active,.banner:active,.tool:active,.item:active,.mode:active,.chk:active,.edbtn:active,.coin:active,.gear:active,.stbtn:active,.tile:active,.mom:active{transform:scale(.96)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <div id="bg"></div>
+<div id="daytint"></div>
+<div id="grain"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
 <div id="app"></div>
 
@@ -870,7 +896,7 @@ const IT=(k,id)=>ITEMS.find(i=>i.k===k&&i.id===id);
 const FREE=['pal:auto','pal:oliva','pal:atardecer','bg:base','frame:none','icon:fire'];
 
 /* ============ Estado ============ */
-const APP_VERSION='2026.09.22.1';
+const APP_VERSION='2026.09.22.2';
 let UPD=null;let RECOVER=false;
 const KEY='presente:v1';
 function DEFAULT_ROUTINES(){return [
@@ -879,7 +905,7 @@ function DEFAULT_ROUTINES(){return [
 const defaults=()=>({v:1,name:'',checkins:{},coins:0,owned:FREE.slice(),
   equip:{pal:'auto',bg:'base',icon:'fire',frame:'none',coll:'',theme:''},
   log:[],later:[],refl:{},stamps:[],chapters:{},dev:{reflNow:false},
-  custom:[],edits:{},hidden:[],backup:{last:null,snooze:null},prefs:{haptics:true,sound:false,calm:false,scape:false,noAutoCer:false},seen:{sem:'',mes:''},
+  custom:[],edits:{},hidden:[],backup:{last:null,snooze:null},prefs:{haptics:true,sound:false,calm:false,scape:false,scapeMode:'',noAutoCer:false},seen:{sem:'',mes:''},
   tune:{},catTune:{},forgot:[],combos:[],intents:{sem:null,mes:null,anio:null},hard:{},pulse:{},birthday:'',exp:null,exitQ:{last:null,snooze:null,log:[]},reenc:{},sugLog:[],endowed:false,stampInfo:{},stampPos:{},albumsDone:{},routines:DEFAULT_ROUTINES(),rlog:{},hvlog:{},energy:{},nsnooze:{},seasonReview:{},albumCover:{},miniEdits:{},people:[],capsules:[],museum:[],favs:[],heavy:{plan:[]},lite:{essential:false,collapsed:{}},restDay:null,restSince:'',meta:{ver:'',notice:false,prevVer:'',lastCheck:0}});
 let S=load();
 rebuildMissions();
@@ -894,7 +920,7 @@ function normalize(o){
   const m=Object.assign(defaults(),o||{});
   m.equip=Object.assign(defaults().equip,(o&&o.equip)||{});
   m.dev=Object.assign({reflNow:false},(o&&o.dev)||{});
-  m.prefs=Object.assign({haptics:true,sound:false,calm:false,scape:false,noAutoCer:false},(o&&o.prefs)||{});
+  m.prefs=Object.assign({haptics:true,sound:false,calm:false,scape:false,scapeMode:'',noAutoCer:false},(o&&o.prefs)||{});if(!m.prefs.scapeMode&&m.prefs.scape)m.prefs.scapeMode='auto';
   m.backup=Object.assign({last:null,snooze:null},(o&&o.backup)||{});
   m.seen=Object.assign({sem:'',mes:''},(o&&o.seen)||{});
   ['owned','log','later','stamps','custom','hidden'].forEach(k=>{if(!Array.isArray(m[k]))m[k]=[];});
@@ -1747,7 +1773,12 @@ function routineNow(){
 }
 const SCAPE_OF={lluvia:'lluvia',oceano:'olas',nieve:'viento',luciernagas:'grillos',estrellas:'grillos',desierto:'viento',boreal:'viento',otono:'viento'};
 const SC={name:'',nodes:[],gain:null};
-function scapeName(){return S.prefs.scape?(SCAPE_OF[S.equip.theme]||''):'';}
+function scapeName(){
+  const mode=S.prefs.scapeMode;
+  if(!mode)return '';
+  if(mode==='auto')return SCAPE_OF[S.equip.theme]||'hogar';
+  return mode;
+}
 function noiseBuf(c,secs,brown){
   const n=Math.floor(c.sampleRate*secs),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);let last=0;
   for(let i=0;i<n;i++){const w=Math.random()*2-1;if(brown){last=(last+.02*w)/1.02;d[i]=last*3.5;}else d[i]=w;}
@@ -1756,13 +1787,14 @@ function noiseBuf(c,secs,brown){
 function scapeStop(){
   SC.nodes.forEach(x=>{try{x.stop&&x.stop();}catch(e){}try{x.disconnect();}catch(e){}});
   SC.nodes=[];SC.name='';if(SC.gain){try{SC.gain.disconnect();}catch(e){}SC.gain=null;}
+  (SC.timers||[]).forEach(id=>clearTimeout(id));SC.timers=[];
 }
 function scapeSync(){
   const want=scapeName();
   if(want===SC.name)return;
   scapeStop();if(!want)return;
   const c=ac();if(!c)return;
-  const g=c.createGain();g.gain.setValueAtTime(.0001,c.currentTime);g.gain.linearRampToValueAtTime(1,c.currentTime+2.5);g.connect(c.destination);SC.gain=g;SC.name=want;
+  const g=c.createGain();g.gain.setValueAtTime(.0001,c.currentTime);g.gain.linearRampToValueAtTime(1,c.currentTime+2.5);g.connect(c.destination);SC.gain=g;SC.name=want;SC.timers=[];
   const add=(...x)=>{x.forEach(n=>SC.nodes.push(n));};
   const src=(buf)=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.start();add(s);return s;};
   if(want==='lluvia'){
@@ -1787,6 +1819,23 @@ function scapeSync(){
       en.frequency.value=.35+i*.11;eg.gain.value=.003;en.connect(eg);eg.connect(a.gain);
       o.connect(a);a.connect(g);o.start();l.start();en.start();add(o,a,l,lg,en,eg);
     });
+  }else if(want==='hogar'){
+    const s=src(noiseBuf(c,4,true)),lp=c.createBiquadFilter(),o=c.createGain();
+    lp.type='lowpass';lp.frequency.value=340;o.gain.value=.05;
+    s.connect(lp);lp.connect(o);o.connect(g);add(lp,o);
+    const crackle=()=>{
+      if(SC.name!=='hogar')return;
+      const c2=ac();if(!c2)return;
+      try{
+        const buf=noiseBuf(c2,.06,false),s2=c2.createBufferSource();s2.buffer=buf;
+        const bp=c2.createBiquadFilter();bp.type='bandpass';bp.frequency.value=900+Math.random()*2200;bp.Q.value=3+Math.random()*4;
+        const gg=c2.createGain(),t=c2.currentTime;
+        gg.gain.setValueAtTime(.0001,t);gg.gain.exponentialRampToValueAtTime(.05+Math.random()*.05,t+.006);gg.gain.exponentialRampToValueAtTime(.0001,t+.05+Math.random()*.05);
+        s2.connect(bp);bp.connect(gg);gg.connect(g);s2.start();
+      }catch(e){}
+      SC.timers.push(setTimeout(crackle,650+Math.random()*2200));
+    };
+    crackle();
   }
 }
 function mediaBytes(prefix){let n=0,c=0;Object.keys(PH).forEach(k=>{if(k.indexOf(prefix)===0){n+=String(PH[k]).length;c++;}});return {n:n,c:c};}
@@ -2273,13 +2322,69 @@ function edListHTML(){
   if(hid.length)o+='<h3>Ocultas</h3>'+hid.map(b=>'<div class="edrow"><p>'+esc(S.edits[b.id]||b.text)+'<small>'+tlabel(b.t)+'</small></p><button class="edbtn" data-a="edRestore" data-id="'+b.id+'">Restaurar</button></div>').join('');
   return o;
 }
+function scapeChipsHTML(){
+  return [['','Apagado'],['auto','Según tu tema'],['hogar','Fogata'],['lluvia','Lluvia'],['olas','Olas']].map(x=>'<button class="chip'+(( S.prefs.scapeMode||'')===x[0]?' on':'')+'" data-a="scapeMode" data-v="'+x[0]+'">'+x[1]+'</button>').join('');
+}
 function settingsExtra(){
   const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   return '<h3>Día de descanso</h3><p class="tiny" style="margin-bottom:8px">Un día a la semana sin nada que cumplir. Cuenta a favor de tu racha.</p><div class="chips">'+[[null,'Ninguno']].concat([1,2,3,4,5,6,0].map(d=>[d,days[d]])).map(x=>'<button class="chip'+((S.restDay===x[0])?' on':'')+'" data-a="restSet" data-v="'+(x[0]===null?'':x[0])+'">'+x[1]+'</button>').join('')+'</div>'
-   +'<h3>Más ajustes</h3><label class="tgl"><input type="checkbox" id="scape" '+(S.prefs.scape?'checked':'')+'><span>Paisaje sonoro del tema (lluvia, olas, grillos, viento)</span></label><label class="tgl"><input type="checkbox" id="noauto" '+(S.prefs.noAutoCer?'':'checked')+'><span>Abrir las ceremonias sola los domingos y fin de mes</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn ghost sm" data-a="tools">Herramientas</button><button class="btn ghost sm" data-a="health">Salud de los datos</button><button class="btn ghost sm" data-a="shortcuts">Atajos</button></div>';
+   +'<h3>Paisaje sonoro</h3><p class="tiny" style="margin-bottom:8px">Un sonido suave de fondo mientras usas Presente. Gratis, sin comprar nada.</p><div id="scapeChips">'+scapeChipsHTML()+'</div><label class="tgl"><input type="checkbox" id="noauto" '+(S.prefs.noAutoCer?'':'checked')+'><span>Abrir las ceremonias sola los domingos y fin de mes</span></label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn ghost sm" data-a="tools">Herramientas</button><button class="btn ghost sm" data-a="health">Salud de los datos</button><button class="btn ghost sm" data-a="shortcuts">Atajos</button></div>';
 }
 function museumSection(){
   return '<section class="sec"><h2>Museo de pequeñas cosas</h2><button class="ccard glass" style="width:100%;flex-direction:row;justify-content:space-between;text-align:left;padding:16px" data-a="museum"><span><b>Lo que notaste y aprendiste</b><small style="display:block">Una línea por pieza, guardada con calma.</small></span><span style="font:400 24px var(--fd);white-space:nowrap;margin-left:10px">'+S.museum.length+'</span></button></section>';
+}
+function dayTint(){
+  const h=new Date().getHours();
+  if(h<6)return{c:'#2c2a55',o:.05};
+  if(h<8)return{c:'#f2a76b',o:.07};
+  if(h<11)return{c:'#fef6da',o:.04};
+  if(h<15)return{c:'#ffffff',o:.02};
+  if(h<18)return{c:'#f0b46a',o:.05};
+  if(h<20)return{c:'#e8784a',o:.08};
+  if(h<23)return{c:'#4a3a72',o:.06};
+  return{c:'#241f42',o:.07};
+}
+function applyDayTint(){
+  const t=dayTint(),r=document.documentElement;
+  r.style.setProperty('--daytint-color',t.c);r.style.setProperty('--daytint-op',String(t.o));
+}
+const DOWN=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+function dayLine(){
+  const now=new Date(),h=now.getHours(),dow=now.getDay();
+  const part=h<6?'de madrugada':h<12?'por la mañana':h<14?'a mediodía':h<19?'por la tarde':h<23?'de noche':'de madrugada';
+  const wk=(dow===0||dow===6)?', fin de semana':'';
+  let l='Es '+DOWN[dow]+' '+part+wk+'.';
+  const sn=season();
+  if(sn&&hashStr(today())%4===0)l+=' '+sn.n+'.';
+  return l;
+}
+function nookStage(){
+  const n=Object.keys(S.checkins).length;
+  if(n<7)return{e:'🌱',n:'semilla'};
+  if(n<30)return{e:'🌿',n:'brote'};
+  if(n<90)return{e:'🪴',n:'una planta'};
+  return{e:'🌳',n:'un árbol'};
+}
+function weekMoodColor(){
+  const t=today(),by={};
+  for(let i=0;i<7;i++){const d=addDays(t,-i);S.log.filter(e=>e.d===d).forEach(e=>{by[e.cat]=(by[e.cat]||0)+e.t;});}
+  const top=Object.keys(by).sort((a,b)=>by[b]-by[a])[0];
+  return top&&CAT[top]?CAT[top].c:'';
+}
+function last30Line(l){
+  if(!l.ci&&!l.viv)return 'El último mes estuvo tranquilo. Cuando quieras, aquí sigue todo.';
+  if(l.viv)return 'En el último mes volviste '+l.ci+(l.ci===1?' vez':' veces')+' y viviste '+l.viv+(l.viv===1?' misión.':' misiones.');
+  return 'En el último mes volviste '+l.ci+(l.ci===1?' vez':' veces')+', sin prisa por hacer algo más.';
+}
+function thock(t0,v){
+  const c=ac();if(!c)return;
+  try{
+    const buf=noiseBuf(c,.06,false),s=c.createBufferSource();s.buffer=buf;
+    const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(560+Math.random()*260,c.currentTime+t0);bp.Q.value=1.1;
+    const g=c.createGain(),t=c.currentTime+t0;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.035,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.1);
+    s.connect(bp);bp.connect(g);g.connect(c.destination);s.start(t);s.stop(t+.14);
+  }catch(e){}
 }
 function suggestCat(){
   const rated=S.log.filter(e=>e.rate);if(rated.length<3)return null;
@@ -2330,12 +2435,12 @@ function sfx(n){
   const B={
     tap:()=>blip(540,0,.08,.035),
     card:()=>blip(392,0,.2,.05),
-    done:()=>{blip(659,0,.5,.07);blip(880,.13,.75,.06);},
-    level:()=>{[523,659,784,1047].forEach((f,i)=>blip(f,i*.11,.6,.05));},
+    done:()=>{blip(659,0,.5,.07);blip(880,.13,.75,.06);thock(0,.03);},
+    level:()=>{[523,659,784,1047].forEach((f,i)=>blip(f,i*.11,.6,.05));thock(0,.025);},
     buy:()=>{blip(784,0,.25,.055);blip(1175,.09,.4,.045);},
     close:()=>{blip(523,0,.5,.055);blip(392,.16,.9,.055);},
     ignite:()=>{blip(196,0,1.3,.065,'sine',330);blip(392,.1,1.5,.045);blip(587,.25,1.5,.035);},
-    stamp:()=>{blip(1319,0,.25,.035,'triangle');blip(1568,.07,.3,.03,'triangle');},
+    stamp:()=>{blip(1319,0,.25,.035,'triangle');blip(1568,.07,.3,.03,'triangle');thock(0,.02);},
     pegar:()=>{blip(180,0,.09,.09,'triangle');blip(120,.04,.12,.06,'triangle');}
   };
   if(B[n])B[n]();
@@ -2487,7 +2592,7 @@ function greeting(){const h=new Date().getHours();return h<12?'Buenos días':h<1
 function showCI(){return (!S.checkins[today()]&&!U.skipCI)||U.ciOpen;}
 function render(){
   const app=$('#app'),prev=$('#main'),st=prev?prev.scrollTop:0;
-  applyTheme();
+  applyTheme();applyDayTint();
   if(showCI()){app.innerHTML=viewCI();bindCI();U.lastTab=null;return;}
   if(S.prefs.calm&&U.tab==='tie')U.tab='hoy';
   let body='';
@@ -2600,10 +2705,11 @@ function weekStrip(){
   return h;
 }
 function streakCard(){
-  const t=today(),st=stats(),ci=S.checkins[t],ic=IT('icon',S.equip.icon).e,l=last30(),hard=hardToday();
-  return '<section class="glass streak card"><div class="sk-h"><span class="sk-ic">'+ic+'</span><div><div class="sk-n">'+st.streak+'<small>'+(st.streak===1?'día encendido':'días encendidos')+'</small></div><p>'+(st.brasas?st.brasas+(st.brasas===1?' brasa guarda':' brasas guardan')+' calor. Tu racha no se apaga.':'Tu fuego está tibio y constante.')+'</p></div></div>'
-   +'<p class="l30">Últimos 30 días: <b>'+l.ci+'</b> '+(l.ci===1?'encendido':'encendidos')+' y <b>'+l.viv+'</b> con misión.</p>'
+  const t=today(),st=stats(),ci=S.checkins[t],ic=IT('icon',S.equip.icon).e,l=last30(),hard=hardToday(),nk=nookStage(),wm=weekMoodColor();
+  return '<section class="glass streak card" style="--nook:'+(wm||'var(--accent)')+'"><div class="sk-h"><span class="sk-ic">'+ic+'<span class="heatwrap" aria-hidden="true"><i class="heat" style="--hx:-6px"></i><i class="heat" style="--hx:-2px;--hd:.8s"></i><i class="heat" style="--hx:3px;--hd:1.6s"></i><i class="heat" style="--hx:7px;--hd:2.3s"></i></span></span><div><div class="sk-n">'+st.streak+'<small>'+(st.streak===1?'día encendido':'días encendidos')+'</small></div><p>'+(st.brasas?st.brasas+(st.brasas===1?' brasa guarda':' brasas guardan')+' calor. Tu racha no se apaga.':'Tu fuego está tibio y constante.')+'</p></div></div>'
+   +'<p class="l30">'+last30Line(l)+'</p>'
    +'<div class="week">'+weekStrip()+'</div>'
+   +'<p class="nook">'+nk.e+' <span>Tu rincón es ya '+nk.n+'.</span></p>'
    +(ci&&ci.intent?'<p class="intent">Plan de hoy: <i>'+esc(ci.intent)+'</i></p>':'')
    +(!ci?'<button class="btn sm" style="margin-top:12px" data-a="openCI">Encender el día</button>':'')
    +(hard?'<p class="hardnote">Hoy va pesado. Hoy basta con un minuto.</p><button class="link" style="padding:6px 0 0" data-a="hardOff">Ya me siento mejor</button>':'<button class="link" style="padding:8px 0 0" data-a="hardOn">Hoy va pesado</button>')+'</section>';
@@ -2624,7 +2730,7 @@ function weekCard(){
 const HARD_PH=['Hoy bastó con esto.','Un minuto también cuenta.','Cuidarte hoy fue suficiente.'];
 function viewHoy(){
   const now=new Date(),calm=S.prefs.calm,es=S.lite.essential,hard=hardToday()&&!U.hardMore,rest=isRest(today());
-  let o='<header class="top"><div><p class="date">'+dateLong(now)+'</p><h1>'+greeting()+(S.name?', '+esc(S.name):'')+'</h1></div><div class="tr">'+(calm?'':'<button class="coin" data-a="tab" data-v="tie" aria-label="Monedas">🪙 <b>'+S.coins+'</b></button>')+'<button class="gear" data-a="settings" aria-label="Ajustes">'+SV.gear+'</button></div></header>';
+  let o='<header class="top"><div><p class="date">'+dateLong(now)+'</p><h1>'+greeting()+(S.name?', '+esc(S.name):'')+'</h1><p class="daynote">'+esc(dayLine())+'</p></div><div class="tr">'+(calm?'':'<button class="coin" data-a="tab" data-v="tie" aria-label="Monedas">🪙 <b>'+S.coins+'</b></button>')+'<button class="gear" data-a="settings" aria-label="Ajustes">'+SV.gear+'</button></div></header>';
   o+='<div class="qrow"><button class="chip q" data-a="quick">⚡ Un minuto</button><button class="chip q" data-a="tools">🧰 Herramientas</button><button class="chip q'+(es?' on':'')+'" data-a="essential">'+(es?'Ver todo':'Solo lo esencial')+'</button></div>';
   o+=streakCard()+restCard()+energyRow();
   if(hardToday())o+=heavyCard();
@@ -2648,7 +2754,7 @@ function viewHoy(){
     o+='<section class="sec" id="deck"><h2>Elige una</h2>'+U.deck.cards.map((m,i)=>{
       const c=CAT[m.cat];
       return '<article class="mcard glass" style="--c:'+c.c+'"><div class="mtag"><span>'+c.e+' '+c.n+'</span><span>'+tlabel(m.t)+'</span></div><p class="mtext">'+esc(m.text)+'</p>'+(m.mini?'<p class="mini">Mini, 2 min: '+esc(m.mini)+'</p>':'')+personLine(m)+whyBtn(m)+'<div class="macts"><button class="btn" data-a="done" data-i="'+i+'">Completar</button>'+(GUIDES[m.id]?'<button class="btn ghost sm" data-a="deckGuide" data-i="'+i+'">Guiada</button>':'')+(m.mini?'<button class="btn ghost sm" data-a="mini" data-i="'+i+'">Versión mini</button>':'')+'<button class="btn ghost sm" data-a="swap" data-i="'+i+'">Otra</button><button class="btn ghost sm" data-a="later" data-i="'+i+'">Después</button></div></article>';
-    }).join('')+(U.deck.cards.length?'':'<p class="empty">No hay misiones para esta combinación.</p>')+'<button class="link" data-a="editor" data-pre="1">Añadir una misión aquí</button></section>';
+    }).join('')+(U.deck.cards.length?'':'<p class="empty">Por ahora no hay misiones así. Prueba otro tiempo, o añade una tuya.</p>')+'<button class="link" data-a="editor" data-pre="1">Añadir una misión aquí</button></section>';
   }
   if(!es)o+=fold('combos','Combos',combosInner());
   if(S.later.length)o+=fold('despues','Para cuando el día lo permita',laterInner());
@@ -3331,14 +3437,9 @@ function refreshCombo(keep){const b=$('#sbody');if(!b||!U.cb)return;const st=b.s
 function refreshLearn(){const b=$('#sbody');if(!b)return;const st=b.scrollTop;b.innerHTML=learnHTML();b.scrollTop=st;}
 
 const CHANGELOG=[
- 'Hoy más ligero: modo "Solo lo esencial", secciones plegables y un único centro de avisos.',
- 'Un minuto, herramientas y atajos por enlace para abrir Presente directo en algo.',
- 'Misiones guiadas (respiración, tres cosas buenas, carta de gratitud, lista de mañana) y paseo con propósito.',
- 'Rutinas ancla, mis personas, museo de pequeñas cosas, cápsulas del tiempo y plan para días pesados.',
- 'Notas de voz, búsqueda de momentos, tu año y una ceremonia anual.',
- 'Sugerencias con contexto, pulso de energía, dosis adaptativa y día de descanso.',
- 'Qué te sube el ánimo, estampillas que puedes acomodar, compartir y usar como portada.',
- 'Cierre de temporada, salud de los datos, paisajes sonoros y recompensas que celebran.'
+ 'Presente ahora se siente más cozy: luz que cambia con la hora, textura de papel y transiciones más suaves.',
+ 'Un paisaje sonoro gratis (fogata, lluvia u olas), sin necesidad de comprar un tema.',
+ 'Tu rincón crece contigo, y la tarjeta del día refleja un poco de tu semana.'
 ];
 function prevRaw(){
   try{const r=localStorage.getItem(KEY+':prev');if(r)return r;}catch(e){}
@@ -3407,6 +3508,12 @@ const A={
  equip(el){equipItem(el.dataset.k,el.dataset.id);save();render();},
  settings(){openSettings();},
  why(el){openWhy(el.dataset.id);},
+ scapeMode(el){
+  S.prefs.scapeMode=el.dataset.v;save();
+  const l=$('#scapeChips');if(l)l.innerHTML=scapeChipsHTML();
+  scapeSync();const c=ac();if(c&&c.state==='suspended')c.resume();
+ },
+
  fold(el){const k=el.dataset.k;S.lite.collapsed[k]=!S.lite.collapsed[k];save();render();},
  essential(){S.lite.essential=!S.lite.essential;save();render();},
  nLater(el){const id=el.dataset.id;S.nsnooze[id]=addDays(today(),NSNZ[id]||1);save();render();},
@@ -3774,8 +3881,7 @@ document.addEventListener('change',e=>{
   if(t.id==='hapt'){S.prefs.haptics=t.checked;save();if(t.checked)buzz(15);}
   if(t.id==='snd'){S.prefs.sound=t.checked;save();if(t.checked)sfx('done');}
   if(t.id==='calm'){S.prefs.calm=t.checked;if(t.checked&&U.tab==='tie')U.tab='hoy';save();render();}
-  if(t.id==='scape'){S.prefs.scape=t.checked;save();if(t.checked){scapeSync();const c=ac();if(c&&c.state==='suspended')c.resume();}else scapeStop();}
-  if(t.id==='noauto'){S.prefs.noAutoCer=!t.checked;save();}
+   if(t.id==='noauto'){S.prefs.noAutoCer=!t.checked;save();}
   if(t.id==='walkfile'&&t.files&&t.files[0]&&U.walk){readPhoto(t.files[0]).then(url=>{U.walk.photo=url;shRefresh(walkHTML());}).catch(()=>toast('No pude leer esa foto'));}
   if(t.id==='bday'){S.birthday=t.value?t.value.slice(5):'';save();toast('Listo');}
   if(t.id==='bfile'&&t.files&&t.files[0]){const fr=new FileReader();fr.onload=()=>previewImport(String(fr.result));fr.onerror=()=>toast('No pude leer ese archivo');fr.readAsText(t.files[0]);t.value='';}
@@ -3784,7 +3890,7 @@ document.addEventListener('change',e=>{
     readPhoto(file).then(url=>{const e=S.log.find(x=>x.id===s.id);const key='ph_'+e.id;idbPut(key,url);e.moment=e.moment||{};e.moment.photo=key;save();if(U.sh===s)refreshRest();}).catch(()=>toast('No pude leer esa foto'));
   }
 });
-document.addEventListener('pointerdown',()=>{if(S.prefs.scape){scapeSync();const c=ac();if(c&&c.state==='suspended')c.resume();}},{passive:true});
+document.addEventListener('pointerdown',()=>{if(S.prefs.scapeMode){scapeSync();const c=ac();if(c&&c.state==='suspended')c.resume();}},{passive:true});
 document.addEventListener('pointermove',e=>{const d=U.drag;if(!d)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;if(!d.moved&&Math.hypot(dx,dy)<8)return;d.moved=true;d.el.style.transform='translate('+dx+'px,'+dy+'px) scale(1.12)';d.el.style.zIndex=5;d.el.style.transition='none';},{passive:true});
 document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('[data-arr]');if(!b||!U.arr)return;U.drag={k:b.dataset.arr,el:b,x0:e.clientX,y0:e.clientY,moved:false};});
 document.addEventListener('pointerup',e=>{
@@ -3793,8 +3899,9 @@ document.addEventListener('pointerup',e=>{
   d.el.style.pointerEvents='none';const t=document.elementFromPoint(e.clientX,e.clientY);d.el.style.pointerEvents='';
   const sl=t&&t.closest&&t.closest('.slot[data-slot]');if(sl)moveStamp(d.k,+sl.dataset.slot);refreshAlb();
 });
-document.addEventListener('visibilitychange',()=>{const c=ac();if(!c)return;if(document.visibilityState==='hidden'){try{c.suspend();}catch(e){}}else if(S.prefs.scape){try{c.resume();}catch(e){}}});
+document.addEventListener('visibilitychange',()=>{const c=ac();if(!c)return;if(document.visibilityState==='hidden'){try{c.suspend();}catch(e){}}else if(S.prefs.scapeMode){try{c.resume();}catch(e){}}});
 window.addEventListener('hashchange',handleHash);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')applyDayTint();});
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&U.day!==today()){U.day=today();U.skipCI=false;U.ciOpen=false;U.mOff=0;U.wOff=0;U.sOff=0;U.sug=null;U.sugN=0;render();}
 });
@@ -3812,7 +3919,7 @@ Promise.race([idbOpen().then(idbAll),new Promise(r=>setTimeout(r,2500))]).then((
     UPD=null;
   }
   save();render();handleHash();
-  setTimeout(()=>checkUpdate(false),4000);setTimeout(checkStorage,2500);
+  setTimeout(()=>checkUpdate(false),4000);setTimeout(checkStorage,2500);setInterval(applyDayTint,900000);
 });
 })();
 </script>
